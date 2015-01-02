@@ -901,6 +901,13 @@ else ifeq ($(TARGET_DEVICE), falcon)
     TARGET_SCREEN_WIDTH := 720
     BRIGHTNESS_SYS_FILE := "/sys/class/leds/lcd-backlight/brightness"
 
+#Nvidia Shield Tablet, Generic (shieldtablet), WiFi (wx_na_wf), LTE-US (wx_na_do), LTE-EU (wx_un_do), Modem-EU (wx_un_mo)
+else ifneq ($(filter $(TARGET_DEVICE),shieldtablet wx_na_do wx_na_wf wx_un_do wx_un_mo),)
+    TARGET_COMMON_NAME := Nvidia Shield Tablet
+    TARGET_SCREEN_HEIGHT := 1920
+    TARGET_SCREEN_WIDTH := 1200
+    BRIGHTNESS_SYS_FILE := "/sys/class/backlight/pwm-backlight/brightness"
+
 #Oneplus bacon, A0001 (One Plus One)
 else ifeq ($(TARGET_DEVICE), bacon)
     TARGET_COMMON_NAME := One Plus One
