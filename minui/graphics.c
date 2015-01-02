@@ -38,6 +38,10 @@
 #endif
 
 #include "minui.h"
+#ifdef BOARD_HAS_FLIPPED_SCREEN
+#include "recovery_overlay.h"
+#define PIXEL_OFFSET 64
+#endif
 
 #if defined(RECOVERY_BGRA)
 #define PIXEL_FORMAT GGL_PIXEL_FORMAT_BGRA_8888
@@ -294,10 +298,29 @@ void gr_flip(void)
         if (double_buffering)
             gr_active_fb = (gr_active_fb + 1) & 1;
 
+#ifdef BOARD_HAS_FLIPPED_SCREEN
+        int buffer = 0;
+        int fbsize = fi.line_length * vi.yres;
+        
+        /* but reverse the order of the pixels. */
+        for (buffer = 0; buffer < fbsize; buffer += 4)
+        {
+            const char *src = (char *)gr_mem_surface.data;
+            char *dst = (char *)gr_framebuffer[gr_active_fb].data;
+            
+            /* Since we're reversing the buffer data, we need to flip the order
+             * of the subpixel values, too. Otherwise they'll be backwards. */
+            dst[(fbsize-(buffer+4))] = src[buffer-PIXEL_OFFSET];
+            dst[(fbsize-(buffer+3))] = src[buffer+1-PIXEL_OFFSET];
+            dst[(fbsize-(buffer+2))] = src[buffer+2-PIXEL_OFFSET];
+            dst[(fbsize-(buffer+1))] = src[buffer+3-PIXEL_OFFSET];
+        }
+#else
         /* copy data from the in-memory surface to the buffer we're about
          * to make active. */
         memcpy(gr_framebuffer[gr_active_fb].data, gr_mem_surface.data,
                fi.line_length * vi.yres);
+#endif
 
         /* inform the display driver */
         set_active_framebuffer(gr_active_fb);
